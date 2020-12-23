@@ -29,6 +29,7 @@ def get_table_data(soup, table_name):
     player_stats = player_stats[1:]
     player_stats = [[td.getText() for td in player_stats[i].findAll('td')]  for i in range(len(player_stats))]
     stats = pd.DataFrame(player_stats, columns = headers)
+    stats = stats.dropna()
 
     # opens/makes seasoninfo.xlsx and saves the stats dataframe to that excel workbook
     # stats.to_excel(writer, index=False, sheet_name="{}".format(table_name))
