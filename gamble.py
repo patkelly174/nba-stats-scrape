@@ -7,7 +7,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 
 # writer = pd.ExcelWriter("seasoninfo.xlsx")
 wb = Workbook()
-
+print("hello")
 
 def get_table_data(soup, table_name):
     # finds the table on the webpage with the passed table_name id
