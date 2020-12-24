@@ -7,7 +7,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 
 # writer = pd.ExcelWriter("seasoninfo.xlsx")
 wb = Workbook()
-
+print("hello")
 
 def get_table_data(soup, table_name):
     # finds the table on the webpage with the passed table_name id
@@ -33,7 +33,10 @@ def get_table_data(soup, table_name):
 
     # opens/makes seasoninfo.xlsx and saves the stats dataframe to that excel workbook
     # stats.to_excel(writer, index=False, sheet_name="{}".format(table_name))
-    ws = wb.create_sheet(table_name)
+    name = soup.find("h1", {"itemprop":"name"}).getText()
+    name = name.split()
+    string  = '-'.join(name[:3])
+    ws = wb.create_sheet(string)
 
     for r in dataframe_to_rows(stats, index=False, header=True):
         ws.append(r)
