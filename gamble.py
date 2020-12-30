@@ -3,11 +3,38 @@ import pandas as pd
 import requests
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
+import sqlite3
+from sqlite3 import Error
 
 
 # writer = pd.ExcelWriter("seasoninfo.xlsx")
 wb = Workbook()
-print("hello")
+pd.set_option('display.max_rows', 500)
+pd.set_option('display.max_columns', 500)
+pd.set_option('display.width', 1000)
+
+# conn = None
+
+conn = sqlite3.connect("pythonsqlite.db")
+
+def create_connection(db_file):
+    conn = None
+    try:
+        conn = sqlite3.connect(db_file)
+        # create_table_test(conn)
+    except Error as e:
+        print(e)
+    finally:
+        if conn:
+            conn.close()
+
+def create_table(conn, name):
+    try:
+        c = conn.cursor()
+        c.execute(create_table_sql)
+    except Error as e:
+        print(e)
+
 
 def get_table_data(soup, table_name):
     # finds the table on the webpage with the passed table_name id
@@ -24,21 +51,39 @@ def get_table_data(soup, table_name):
     headers = [th.getText() for th in headers[0].findAll('th')]
     # do not need to first column so set header to everything bu that first column
     headers = headers[1:]
+    headers[4] = "H/A"
+    headers[6] = "DROP2"
 
     player_stats = [tr for tr in table_content.findAll('tr')]
     player_stats = player_stats[1:]
     player_stats = [[td.getText() for td in player_stats[i].findAll('td')]  for i in range(len(player_stats))]
-    stats = pd.DataFrame(player_stats, columns = headers)
+    name = soup.find("h1", {"itemprop":"name"}).getText()
+    name = name.split()
+
+    if "Boston" in name:
+        string  = '_'.join(name[1:3])
+    else:
+        string  = '_'.join(name[:2])
+
+    i = [string for i in range(len(player_stats))]
+    stats = pd.DataFrame(player_stats, index = i, columns = headers)
     stats = stats.dropna()
+    stats = stats.drop(["Age", "GS", "DROP2"], axis=1)
+
 
     # opens/makes seasoninfo.xlsx and saves the stats dataframe to that excel workbook
     # stats.to_excel(writer, index=False, sheet_name="{}".format(table_name))
-    name = soup.find("h1", {"itemprop":"name"}).getText()
-    name = name.split()
-    string  = '-'.join(name[:3])
+    # name = soup.find("h1", {"itemprop":"name"}).getText()
+
     ws = wb.create_sheet(string)
 
-    for r in dataframe_to_rows(stats, index=False, header=True):
+    try:
+        stats.to_sql(string, con = conn, if_exists='replace')
+    except Error as e:
+        print(e)
+
+
+    for r in dataframe_to_rows(stats, index=True, header=True):
         ws.append(r)
     wb.save(filename = "nba_stats.xlsx")
 
@@ -67,6 +112,7 @@ def get_player_gamelog(url):
 
 
 def main():
+    create_connection("pythonsqlite.db")
     player_links = get_table_data(soup, "per_game")
     get_player_data(player_links)
     # get_opp_team_data(opp_soup, opp_team)
