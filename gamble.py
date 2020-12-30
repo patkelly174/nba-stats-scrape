@@ -62,7 +62,7 @@ def get_table_data(soup, table_name):
         ws.append(r)
     wb.save(filename = "nba_stats.xlsx")
 
-    # all_links is all the links found in the tables that were webscraped **varibale not currently used*
+    # all_links is all the links found in the tables that were webscraped **varibale not currently used**
     return all_links
 
 
