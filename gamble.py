@@ -98,19 +98,13 @@ def get_player_gamelog(url):
 
 
 def main():
+    team = input("Enter the team you would like to see stats for. (Use their 3 letter designation BOS, PHI, etc.)\n")
+    url = "https://www.basketball-reference.com/teams/{}/2020.html".format(team)
+    r = requests.get(url)
+    soup = BeautifulSoup(r.content, "html.parser")
     player_links = get_table_data(soup, "per_game")
     get_player_data(player_links)
-    # get_opp_team_data(opp_soup, opp_team)
 
 
 
-team = input("Enter the team you would like to see stats for. (Use their 3 letter designation BOS, PHI, etc.)\n")
-# opp_team = input("Who is this team playing that you would like to see matchup history for? (Same designation as before)\n")
-# url = "https://www.basketball-reference.com/teams/BOS/2020.html"
-url = "https://www.basketball-reference.com/teams/{}/2020.html".format(team)
-# opp_url = "https://www.basketball-reference.com/teams/{}/2020/gamelog/".format(opp_team)
-r = requests.get(url)
-soup = BeautifulSoup(r.content, "html.parser")
-# r2 = requests.get(opp_url)
-# opp_soup = BeautifulSoup(r2.content, "html.parser")
 main()
